@@ -5,6 +5,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -18,13 +20,16 @@ import javax.sql.DataSource;
 
 @Configuration
 @ComponentScan("ru.askarov.springcourse")
+@PropertySource("classpath:db.properties")
 @EnableWebMvc
 public class SpringConfig implements WebMvcConfigurer {
     private final ApplicationContext context;
+    private final Environment environment;
 
     @Autowired
-    public SpringConfig(ApplicationContext context) {
+    public SpringConfig(ApplicationContext context, Environment environment) {
         this.context = context;
+        this.environment = environment;
     }
 
     @Bean
@@ -53,15 +58,11 @@ public class SpringConfig implements WebMvcConfigurer {
 
     @Bean
     public DataSource dataSource(){
-        final String URL = "jdbc:mysql://localhost:3306/mydbtest";
-        final String USER_NAME = "root";
-        final String PASSWORD = "238341Qa";
-
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        dataSource.setUrl(URL);
-        dataSource.setUsername(USER_NAME);
-        dataSource.setPassword(PASSWORD);
+        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        dataSource.setUrl(environment.getProperty("db.URL"));
+        dataSource.setUsername(environment.getProperty("db.USER_NAME"));
+        dataSource.setPassword(environment.getProperty("db.PASSWORD"));
 
         return dataSource;
     }
